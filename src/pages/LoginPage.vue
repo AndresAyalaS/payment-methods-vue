@@ -55,7 +55,7 @@ async function submit() {
   try {
     await authStore.login(credentials);
     const redirect =
-      typeof route.query.redirect === 'string' ? route.query.redirect : '/home';
+      typeof route.query.redirect === 'string' ? route.query.redirect : '/payment-methods';
     await router.replace(redirect);
   } catch {
     // The store supplies the visual error state.

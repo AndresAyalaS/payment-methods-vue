@@ -11,7 +11,7 @@ export function installNavigationGuards(router: Router) {
     }
 
     if (to.name === 'login' && authStore.isAuthenticated) {
-      return { name: 'home' };
+      return { name: 'payment-methods' };
     }
 
     return true;

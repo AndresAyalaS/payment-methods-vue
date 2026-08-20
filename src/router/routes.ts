@@ -11,11 +11,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', redirect: { name: 'home' } },
+      { path: '', redirect: { name: 'payment-methods' } },
       {
-        path: 'home',
-        name: 'home',
-        component: () => import('@/pages/HomePage.vue'),
+        path: 'payment-methods',
+        name: 'payment-methods',
+        component: () => import('@/pages/payment-methods/PaymentMethodsPage.vue'),
       },
     ],
   },
