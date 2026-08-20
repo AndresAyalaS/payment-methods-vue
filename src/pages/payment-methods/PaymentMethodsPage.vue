@@ -30,6 +30,8 @@
       :columns="columns"
       :loading="paymentMethodStore.isLoading"
       no-data-label="No hay metodos de pago para mostrar."
+      rows-per-page-label="Items por pagina:"
+      :pagination-label="paginationLabel"
     >
       <template #body-cell-isActive="props"
         ><q-td :props="props"
@@ -146,5 +148,8 @@ async function remove() {
 }
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' }).format(new Date(value));
+}
+function paginationLabel(firstRowIndex: number, lastRowIndex: number, totalRowsNumber: number) {
+  return `${firstRowIndex}-${lastRowIndex} de ${totalRowsNumber}`;
 }
 </script>
