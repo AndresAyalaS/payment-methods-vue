@@ -1,6 +1,7 @@
 import type {
   PaymentMethod,
   PaymentMethodFilters,
+  PaymentMethodInput,
 } from '@/types/payment-method';
 
 let paymentMethods: PaymentMethod[] = [
@@ -51,6 +52,35 @@ export async function getPaymentMethodsMock(
     .map(clone);
 }
 
+export async function createPaymentMethodMock(payload: PaymentMethodInput): Promise<PaymentMethod> {
+  await wait();
+  const paymentMethod: PaymentMethod = {
+    id: crypto.randomUUID(),
+    ...payload,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  };
+
+  paymentMethods = [paymentMethod, ...paymentMethods];
+  return clone(paymentMethod);
+}
+
+export async function updatePaymentMethodMock(
+  id: string,
+  payload: PaymentMethodInput,
+): Promise<PaymentMethod> {
+  await wait();
+  const index = paymentMethods.findIndex((method) => method.id === id);
+  if (index === -1) throw new Error('No se encontro el metodo de pago seleccionado.');
+
+  const currentPaymentMethod = paymentMethods[index];
+  if (!currentPaymentMethod) throw new Error('No se encontro el metodo de pago seleccionado.');
+
+  const updatedPaymentMethod = { ...currentPaymentMethod, ...payload };
+  paymentMethods[index] = updatedPaymentMethod;
+  return clone(updatedPaymentMethod);
+}
+
 export async function updatePaymentMethodStatusMock(
   id: string,
   isActive: boolean,
@@ -61,4 +91,12 @@ export async function updatePaymentMethodStatusMock(
 
   method.isActive = isActive;
   return clone(method);
+}
+
+export async function deletePaymentMethodMock(id: string): Promise<void> {
+  await wait();
+  const exists = paymentMethods.some((method) => method.id === id);
+  if (!exists) throw new Error('No se encontro el metodo de pago seleccionado.');
+
+  paymentMethods = paymentMethods.filter((method) => method.id !== id);
 }

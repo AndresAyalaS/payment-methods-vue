@@ -5,6 +5,9 @@
         <h1 class="text-h5 text-weight-bold q-my-none">Metodos de pago</h1>
         <p class="text-grey-7 q-mb-none">Consulta y administra los canales registrados.</p>
       </div>
+      <div class="col-12 col-sm-auto">
+        <q-btn color="primary" icon="add" label="Nuevo metodo" no-caps @click="openCreate" />
+      </div>
     </div>
     <q-card flat bordered class="q-mb-lg"
       ><q-card-section
@@ -38,20 +41,58 @@
       <template #body-cell-createdAt="props"
         ><q-td :props="props">{{ formatDate(props.row.createdAt) }}</q-td></template
       >
+      <template #body-cell-actions="props"
+        ><q-td :props="props"
+          ><q-btn
+            flat
+            round
+            icon="edit"
+            color="primary"
+            aria-label="Editar"
+            @click="openEdit(props.row)" /><q-btn
+            flat
+            round
+            icon="delete"
+            color="negative"
+            aria-label="Eliminar"
+            @click="askDelete(props.row)" /></q-td
+      ></template>
     </q-table>
+    <PaymentMethodForm
+      v-model="isFormOpen"
+      :payment-method="selectedMethod"
+      :is-saving="paymentMethodStore.isLoading"
+      @save="save"
+    />
+    <q-dialog v-model="isDeleteOpen"
+      ><q-card
+        ><q-card-section class="text-h6">Eliminar metodo de pago</q-card-section
+        ><q-card-section>Esta accion no se puede deshacer.</q-card-section
+        ><q-card-actions align="right"
+          ><q-btn flat label="Cancelar" no-caps v-close-popup /><q-btn
+            color="negative"
+            label="Eliminar"
+            no-caps
+            :loading="paymentMethodStore.isLoading"
+            @click="remove" /></q-card-actions></q-card
+    ></q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { QTableColumn } from 'quasar';
 import DynamicFilters from '@/components/DynamicFilters.vue';
+import PaymentMethodForm from './PaymentMethodForm.vue';
 import { PAYMENT_METHOD_TYPE_OPTIONS, STATUS_OPTIONS } from '@/constants/payment-method';
 import { usePaymentMethodStore } from '@/stores/payment-method.store';
 import type { FilterField, FilterValues } from '@/types/filters';
-import type { PaymentMethod } from '@/types/payment-method';
+import type { PaymentMethod, PaymentMethodInput } from '@/types/payment-method';
 
 const paymentMethodStore = usePaymentMethodStore();
+const isFormOpen = ref(false);
+const isDeleteOpen = ref(false);
+const selectedMethod = ref<PaymentMethod | null>(null);
 const filterFields: FilterField[] = [
   { key: 'name', label: 'Nombre', type: 'text' },
   { key: 'type', label: 'Tipo', type: 'select', options: PAYMENT_METHOD_TYPE_OPTIONS },
@@ -68,6 +109,7 @@ const columns: QTableColumn[] = [
     align: 'left',
     sortable: true,
   },
+  { name: 'actions', label: 'Acciones', field: 'id', align: 'right' },
 ];
 
 onMounted(() => void paymentMethodStore.fetchAll());
@@ -77,8 +119,30 @@ function search(values: FilterValues) {
 function clearFilters() {
   void paymentMethodStore.fetchAll();
 }
+function openCreate() {
+  selectedMethod.value = null;
+  isFormOpen.value = true;
+}
+function openEdit(paymentMethod: PaymentMethod) {
+  selectedMethod.value = paymentMethod;
+  isFormOpen.value = true;
+}
+async function save(payload: PaymentMethodInput) {
+  const result = selectedMethod.value
+    ? await paymentMethodStore.update(selectedMethod.value.id, payload)
+    : await paymentMethodStore.create(payload);
+  if (result) isFormOpen.value = false;
+}
 function updateStatus(paymentMethod: PaymentMethod, isActive: boolean) {
   void paymentMethodStore.updateStatus(paymentMethod.id, isActive);
+}
+function askDelete(paymentMethod: PaymentMethod) {
+  selectedMethod.value = paymentMethod;
+  isDeleteOpen.value = true;
+}
+async function remove() {
+  if (selectedMethod.value) await paymentMethodStore.remove(selectedMethod.value.id);
+  isDeleteOpen.value = false;
 }
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' }).format(new Date(value));

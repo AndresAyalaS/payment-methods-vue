@@ -1,9 +1,16 @@
 import { defineStore } from 'pinia';
 import {
+  createPaymentMethodMock,
+  deletePaymentMethodMock,
   getPaymentMethodsMock,
+  updatePaymentMethodMock,
   updatePaymentMethodStatusMock,
 } from '@/services/payment-method.mock';
-import type { PaymentMethod, PaymentMethodFilters } from '@/types/payment-method';
+import type {
+  PaymentMethod,
+  PaymentMethodFilters,
+  PaymentMethodInput,
+} from '@/types/payment-method';
 
 export const usePaymentMethodStore = defineStore('payment-methods', {
   state: () => ({
@@ -26,6 +33,24 @@ export const usePaymentMethodStore = defineStore('payment-methods', {
       }
     },
 
+    async create(payload: PaymentMethodInput) {
+      return this.runMutation(
+        () => createPaymentMethodMock(payload),
+        (paymentMethod) => {
+          this.items.unshift(paymentMethod);
+        },
+      );
+    },
+
+    async update(id: string, payload: PaymentMethodInput) {
+      return this.runMutation(
+        () => updatePaymentMethodMock(id, payload),
+        (paymentMethod) => {
+          this.replaceItem(paymentMethod);
+        },
+      );
+    },
+
     async updateStatus(id: string, isActive: boolean) {
       return this.runMutation(
         () => updatePaymentMethodStatusMock(id, isActive),
@@ -33,6 +58,20 @@ export const usePaymentMethodStore = defineStore('payment-methods', {
           this.replaceItem(paymentMethod);
         },
       );
+    },
+
+    async remove(id: string) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      try {
+        await deletePaymentMethodMock(id);
+        this.items = this.items.filter((item) => item.id !== id);
+      } catch (error) {
+        this.errorMessage =
+          error instanceof Error ? error.message : 'No fue posible eliminar el metodo de pago.';
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     replaceItem(paymentMethod: PaymentMethod) {
