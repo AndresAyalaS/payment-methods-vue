@@ -58,7 +58,7 @@ async function submit() {
       typeof route.query.redirect === 'string' ? route.query.redirect : '/payment-methods';
     await router.replace(redirect);
   } catch {
-    // The store supplies the visual error state.
+    // Error handled by authStore.errorMessage
   }
 }
 </script>
