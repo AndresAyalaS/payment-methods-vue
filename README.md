@@ -1,6 +1,6 @@
 # Gestor de metodos de pago
 
-Prueba tecnica para desarrollador frontend semi-senior. Aplicacion SPA construida con Vue 3, TypeScript, Quasar Framework, Vue Router y Pinia.
+Aplicacion SPA construida con Vue 3, TypeScript, Quasar Framework, Vue Router y Pinia.
 
 No requiere backend: las operaciones asincronas se simulan con mocks, conservando la separacion de responsabilidades esperada para una API real.
 
